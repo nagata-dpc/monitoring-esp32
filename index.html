@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Monitoring Kesehatan ESP32 - Pink Edition</title>
     <style>
-        /* Desain Dasar & Skema Warna Pink */
         :root {
             --pink-primary: #ec4899;
             --pink-light: #fbcfe8;
@@ -29,7 +28,6 @@
             padding: 20px;
         }
 
-        /* Kontainer Utama Moderen */
         .container {
             background: white;
             width: 100%;
@@ -40,7 +38,6 @@
             padding: 30px;
         }
 
-        /* Input URL / HTTPS */
         .url-box {
             width: 100%;
             padding: 12px 15px;
@@ -60,7 +57,6 @@
             box-shadow: 0 0 0 3px rgba(236, 72, 153, 0.2);
         }
 
-        /* Tata Letak Form Grid */
         .grid-form {
             display: grid;
             grid-template-columns: 80px 1fr auto;
@@ -88,7 +84,6 @@
             border-color: var(--pink-primary);
         }
 
-        /* Kotak Tampilan Nilai Sensor */
         .sensor-display {
             padding: 10px 15px;
             background-color: #fff1f2;
@@ -103,7 +98,6 @@
             align-items: center;
         }
 
-        /* Gaya Tombol Kreatif */
         .btn {
             background-color: var(--pink-primary);
             color: white;
@@ -123,7 +117,7 @@
         }
 
         .btn-bluetooth {
-            background-color: #6366f1; /* Biru Indigo agar kontras untuk Bluetooth */
+            background-color: #6366f1;
             box-shadow: 0 4px 6px rgba(99, 102, 241, 0.2);
         }
 
@@ -131,7 +125,6 @@
             background-color: #4f46e5;
         }
 
-        /* Desain Tabel Premium */
         .table-wrapper {
             border-radius: 12px;
             overflow: hidden;
@@ -172,7 +165,6 @@
             letter-spacing: 2px;
         }
 
-        /* Posisi Tombol Unduh */
         .actions-footer {
             display: flex;
             justify-content: flex-end;
@@ -183,41 +175,32 @@
 
     <div class="container">
         
-        <!-- Field HTTPS / URL -->
         <input type="text" id="esp-url" value="https://111.111.11.11" placeholder="https://..." class="url-box">
 
-        <!-- Grid Sensor dan Input -->
         <div class="grid-form">
-            
-            <!-- Baris Nama -->
             <label for="input-nama">Nama</label>
             <input type="text" id="input-nama" placeholder="Masukkan nama...">
             <button id="btn-bluetooth" class="btn btn-bluetooth">Connect Bluetooth</button>
 
-            <!-- Baris Heart Rate (HR) -->
             <label>HR</label>
             <div id="val-hr" class="sensor-display">-- bpm</div>
-            <div></div> <!-- Spacer -->
+            <div></div>
 
-            <!-- Baris Temp -->
             <label>Temp</label>
             <div id="val-temp" class="sensor-display">-- °C</div>
             <button id="btn-save" class="btn">Save</button>
-            
         </div>
 
-        <!-- Tabel Log Data -->
         <div class="table-wrapper">
             <table>
                 <thead>
                     <tr>
-                        <th style="border-right: 1px solid var(--pink-light); w-1/3">Nama</th>
-                        <th style="border-right: 1px solid var(--pink-light); w-1/3">HR</th>
-                        <th class="w-1/3">Body Temperature</th>
+                        <th style="border-right: 1px solid var(--pink-light); width: 33.33%;">Nama</th>
+                        <th style="border-right: 1px solid var(--pink-light); width: 33.33%;">HR</th>
+                        <th style="width: 33.33%;">Body Temperature</th>
                     </tr>
                 </thead>
                 <tbody id="table-body">
-                    <!-- Tampilan Awal Berbintik Sesuai Sketsa -->
                     <tr class="placeholder-text">
                         <td style="border-right: 1px solid #f3f4f6;">. . . .</td>
                         <td style="border-right: 1px solid #f3f4f6;">. . . .</td>
@@ -232,7 +215,6 @@
             </table>
         </div>
 
-        <!-- Tombol Download -->
         <div class="actions-footer">
             <button id="btn-download" class="btn">Download</button>
         </div>
@@ -240,13 +222,17 @@
     </div>
 
     <script>
-        // Logika Menyimpan Data Sementara ke Tabel
         const btnSave = document.getElementById('btn-save');
+        const btnDownload = document.getElementById('btn-download');
         const tableBody = document.getElementById('table-body');
+        
+        // Array untuk menyimpan data log secara internal agar mudah diunduh
+        let savedData = [];
         let initialClear = true; 
 
+        // Fungsi ketika tombol SAVE diklik
         btnSave.addEventListener('click', () => {
-            const nama = document.getElementById('input-nama').value || "Tanpa Nama";
+            const nama = document.getElementById('input-nama').value.trim() || "Tanpa Nama";
             const hr = document.getElementById('val-hr').innerText;
             const temp = document.getElementById('val-temp').innerText;
 
@@ -255,6 +241,10 @@
                 initialClear = false;
             }
 
+            // Simpan data ke dalam array objek JavaScript
+            savedData.push({ nama, hr, temp });
+
+            // Tampilkan baris baru ke tabel HTML
             const newRow = document.createElement('tr');
             newRow.innerHTML = `
                 <td style="border-right: 1px solid #f3f4f6; font-weight: 500;">${nama}</td>
@@ -264,8 +254,38 @@
             tableBody.appendChild(newRow);
         });
 
-        // Simulasi penerimaan data Sensor ESP32 (Hapus/Komentari jika sudah disambungkan hardware asli)
-        // Hanya untuk memastikan visual data berjalan baik di halaman web Anda
+        // Fungsi ketika tombol DOWNLOAD diklik
+        btnDownload.addEventListener('click', () => {
+            if (savedData.length === 0) {
+                alert("Belum ada data yang disimpan! Silakan klik tombol 'Save' terlebih dahulu.");
+                return;
+            }
+
+            // Membuat baris dokumen CSV (Header kolom)
+            let csvContent = "data:text/csv;charset=utf-8,";
+            csvContent += "Nama,Heart Rate (HR),Body Temperature\n";
+
+            // Memasukkan setiap baris data yang tersimpan
+            savedData.forEach(row => {
+                // Membersihkan koma jika user memasukkan nama yang mengandung koma agar struktur CSV tidak rusak
+                const safeNama = row.nama.replace(/,/g, " "); 
+                csvContent += `${safeNama},${row.hr},${row.temp}\n`;
+            });
+
+            // Logika browser untuk memicu unduhan file otomatis
+            const encodedUri = encodeURI(csvContent);
+            const downloadLink = document.createElement("a");
+            downloadLink.setAttribute("href", encodedUri);
+            
+            // Nama file saat diunduh otomatis
+            downloadLink.setAttribute("download", "log_monitoring_kesehatan.csv");
+            document.body.appendChild(downloadLink);
+            
+            downloadLink.click(); // Klik tersembunyi
+            document.body.removeChild(downloadLink); // Hapus elemen pembantu
+        });
+
+        // Simulasi penerimaan data Sensor ESP32 (Akan otomatis diperbarui tiap 3 detik untuk demo)
         setInterval(() => {
             const randomHR = Math.floor(Math.random() * (90 - 65 + 1)) + 65;
             const randomTemp = (Math.random() * (37.2 - 36.1) + 36.1).toFixed(1);
