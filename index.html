@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monitoring Kesehatan ESP32</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center p-4">
+
+    <!-- Kontainer Utama mirip Lembaran Catatan/Wireframe -->
+    <div class="bg-white w-full max-w-xl rounded-xl shadow-lg border border-gray-300 p-6 space-y-6">
+        
+        <!-- Field Utama Top Bar: HTTPS/URL Input -->
+        <div class="w-full">
+            <input type="text" id="esp-url" value="https://111.111.11.11" placeholder="https://..." 
+                   class="w-full px-4 py-2 border border-gray-400 rounded-md bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-sm">
+        </div>
+
+        <!-- Bagian Input & Monitoring Utama -->
+        <div class="grid grid-cols-3 gap-4 items-center">
+            
+            <!-- Baris Nama -->
+            <label class="font-bold text-gray-700 text-sm">Nama</label>
+            <input type="text" id="input-nama" placeholder="Masukkan nama..." 
+                   class="col-span-1 px-3 py-1.5 border border-gray-400 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
+            <button id="btn-bluetooth" class="bg-white hover:bg-gray-50 text-gray-800 text-xs font-semibold py-1.5 px-3 border border-gray-400 rounded shadow">
+                connect Bluetooth
+            </button>
+
+            <!-- Baris Heart Rate (HR) -->
+            <label class="font-bold text-gray-700 text-sm">HR</label>
+            <div id="val-hr" class="px-3 py-1.5 border border-gray-400 rounded-md bg-gray-50 text-sm h-9 flex items-center text-gray-600 font-mono">
+                -- bpm
+            </div>
+            <div></div> <!-- Kolom kosong penyeimbang -->
+
+            <!-- Baris Temp -->
+            <label class="font-bold text-gray-700 text-sm">Temp</label>
+            <div id="val-temp" class="px-3 py-1.5 border border-gray-400 rounded-md bg-gray-50 text-sm h-9 flex items-center text-gray-600 font-mono">
+                -- °C
+            </div>
+            <button id="btn-save" class="bg-white hover:bg-gray-50 text-gray-800 text-xs font-semibold py-1.5 px-3 border border-gray-400 rounded shadow">
+                Save
+            </button>
+        </div>
+
+        <!-- Tabel Monitoring Log Data -->
+        <div class="border border-gray-400 rounded-md overflow-hidden bg-white">
+            <table class="w-full text-left text-sm border-collapse">
+                <thead>
+                    <tr class="border-b border-gray-400 bg-gray-50 text-gray-700 font-bold">
+                        <th class="py-2 px-4 border-r border-gray-400 w-1/3 text-center">Nama</th>
+                        <th class="py-2 px-4 border-r border-gray-400 w-1/3 text-center">HR</th>
+                        <th class="py-2 px-4 w-1/3 text-center">Body Temperature</th>
+                    </tr>
+                </thead>
+                <tbody id="table-body">
+                    <!-- Placeholder baris tabel kosong mirip sketsa titik-titik -->
+                    <tr class="border-b border-gray-300 text-gray-400">
+                        <td class="py-2 px-4 border-r border-gray-300 text-center font-mono">. . . .</td>
+                        <td class="py-2 px-4 border-r border-gray-300 text-center font-mono">. . . .</td>
+                        <td class="py-2 px-4 text-center font-mono">. . . .</td>
+                    </tr>
+                    <tr class="border-b border-gray-300 text-gray-400">
+                        <td class="py-2 px-4 border-r border-gray-300 text-center font-mono">. . . .</td>
+                        <td class="py-2 px-4 border-r border-gray-300 text-center font-mono">. . . .</td>
+                        <td class="py-2 px-4 text-center font-mono">. . . .</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Tombol Download di bawah Tabel -->
+        <div class="flex justify-end">
+            <button id="btn-download" class="bg-white hover:bg-gray-50 text-gray-800 text-xs font-semibold py-1.5 px-4 border border-gray-400 rounded shadow">
+                Download
+            </button>
+        </div>
+
+    </div>
+
+    <!-- Integrasi JavaScript untuk Logika & Koneksi ESP32 -->
+    <script>
+        // Logika Menyimpan Data Sementara ke Tabel
+        const btnSave = document.getElementById('btn-save');
+        const tableBody = document.getElementById('table-body');
+        let initialClear = true; // Flag untuk menghapus placeholder bintik-bintik saat data pertama masuk
+
+        btnSave.addEventListener('click', () => {
+            const nama = document.getElementById('input-nama').value || "Tanpa Nama";
+            const hr = document.getElementById('val-hr').innerText;
+            const temp = document.getElementById('val-temp').innerText;
+
+            if (initialClear) {
+                tableBody.innerHTML = ''; // Hapus baris . . . .
+                initialClear = false;
+            }
+
+            // Buat baris data baru
+            const newRow = document.createElement('tr');
+            newRow.className = "border-b border-gray-300 text-gray-800 hover:bg-gray-50";
+            newRow.innerHTML = `
+                <td class="py-2 px-4 border-r border-gray-300 text-center">${nama}</td>
+                <td class="py-2 px-4 border-r border-gray-300 text-center font-mono">${hr}</td>
+                <td class="py-2 px-4 text-center font-mono">${temp}</td>
+            `;
+            tableBody.appendChild(newRow);
+        });
+
+        // ==========================================
+        // CONTOH KONEKSI DATA DARI ESP32 (MAX30102 & DS18B20)
+        // ==========================================
+        // Anda bisa mengaktifkan fungsi ini jika ESP32 mengirim data via AJAX/Fetch API atau WebSockets
+        
+        function fetchDataDariESP32() {
+            const espIP = document.getElementById('esp-url').value;
+            
+            // Contoh implementasi request HTTP GET ke ESP32
+            fetch(`${espIP}/data-sensor`)
+                .then(response => response.json())
+                .then(data => {
+                    // Update tampilan data real-time pada UI
+                    document.getElementById('val-hr').innerText = data.hr + " bpm";
+                    document.getElementById('val-temp').innerText = data.temp + " °C";
+                })
+                .catch(err => console.log("Menunggu koneksi ESP32..."));
+        }
+
+        // Jalankan polling data setiap 1 detik jika ingin menggunakan metode HTTP Fetch
+        // setInterval(fetchDataDariESP32, 1000);
+    </script>
+</body>
+</html>
