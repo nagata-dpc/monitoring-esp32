@@ -119,7 +119,6 @@
             color: var(--pink-primary);
             font-size: 18px;
             display: inline-block;
-            transition: transform 0.2s ease;
         }
 
         @keyframes pulse {
@@ -312,3 +311,5 @@
             if ((hr >= 50 && hr < 60) || (hr > 100 && hr <= 120) || (temp >= 35.0 && temp < 36.1) || (temp > 37.2 && temp <= 38.5)) {
                 return { text: "Kurang Sehat ⚠️", class: "warning", textClass: "text-warning" };
             }
+            return { text: "Sehat 💖", class: "normal", textClass: "text-success" };
+        }
