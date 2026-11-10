@@ -62,12 +62,6 @@
             font-size: 14px;
             margin-bottom: 25px;
             outline: none;
-            transition: all 0.3s;
-        }
-
-        .url-box:focus {
-            border-color: var(--pink-primary);
-            box-shadow: 0 0 0 3px rgba(236, 72, 153, 0.2);
         }
 
         .grid-form {
@@ -90,11 +84,6 @@
             border-radius: 12px;
             outline: none;
             font-size: 14px;
-            transition: border 0.3s;
-        }
-
-        input[type="text"]:focus {
-            border-color: var(--pink-primary);
         }
 
         .sensor-container {
@@ -105,7 +94,6 @@
             background-color: #fff1f2;
             border: 2px solid var(--pink-light);
             border-radius: 12px;
-            transition: all 0.5s ease;
         }
 
         .sensor-value {
@@ -118,15 +106,6 @@
         .heart-icon {
             color: var(--pink-primary);
             font-size: 18px;
-            display: inline-block;
-        }
-
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            30% { transform: scale(1.3); }
-            60% { transform: scale(1.1); }
-            80% { transform: scale(1.4); }
-            100% { transform: scale(1); }
         }
 
         .status-badge {
@@ -137,7 +116,6 @@
             text-transform: uppercase;
             color: white;
             background-color: #9ca3af;
-            transition: all 0.5s ease;
             text-align: center;
             display: inline-block;
             min-width: 100px;
@@ -149,12 +127,7 @@
 
         .badge-normal { background-color: var(--success-color); }
         .badge-warning { background-color: var(--warning-color); }
-        .badge-danger { background-color: var(--danger-color); animation: flash 1s infinite alternate; }
-
-        @keyframes flash {
-            from { opacity: 1; }
-            to { opacity: 0.6; }
-        }
+        .badge-danger { background-color: var(--danger-color); }
 
         .btn {
             background-color: var(--pink-primary);
@@ -165,13 +138,11 @@
             font-weight: 700;
             font-size: 13px;
             cursor: pointer;
-            transition: all 0.2s;
             box-shadow: 0 4px 6px rgba(236, 72, 153, 0.2);
         }
 
         .btn:hover {
             background-color: var(--pink-dark);
-            transform: translateY(-1px);
         }
 
         .btn-bluetooth {
@@ -179,16 +150,11 @@
             box-shadow: 0 4px 6px rgba(99, 102, 241, 0.2);
         }
 
-        .btn-bluetooth:hover {
-            background-color: #4f46e5;
-        }
-
         .table-wrapper {
             border-radius: 16px;
             overflow: hidden;
             border: 2px solid var(--pink-light);
             margin-bottom: 25px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.02);
         }
 
         table {
@@ -213,16 +179,6 @@
             border-bottom: 1px solid #f3f4f6;
         }
 
-        tr:last-child td {
-            border-bottom: none;
-        }
-
-        .placeholder-text {
-            color: #d1d5db;
-            font-weight: bold;
-            letter-spacing: 2px;
-        }
-
         .table-status {
             font-weight: 700;
             font-size: 12px;
@@ -243,7 +199,7 @@
     <div class="container">
         <h1 class="header-title">🌸 Smart Health Dashboard</h1>
         
-        <input type="text" id="esp-url" value="https://111.111.11.11" placeholder="https://..." class="url-box">
+        <input type="text" id="esp-url" value="https://111.111.11.11" class="url-box">
 
         <div class="grid-form">
             <label for="input-nama">Nama Psn</label>
@@ -313,3 +269,33 @@
             }
             return { text: "Sehat 💖", class: "normal", textClass: "text-success" };
         }
+
+        function updateVisualDashboard(hr, temp) {
+            const analisis = analisisKesehatan(hr, temp);
+
+            const badgeHr = document.getElementById('badge-hr');
+            badgeHr.innerText = analisis.text;
+            badgeHr.className = "status-badge badge-" + analisis.class;
+
+            document.getElementById('container-hr').className = "sensor-container bg-" + analisis.class;
+            document.getElementById('container-temp').className = "sensor-container bg-" + analisis.class;
+        }
+
+        btnSave.addEventListener('click', () => {
+            if (currentHR === 0) {
+                alert("Menunggu data sensor valid.");
+                return;
+            }
+
+            const nama = document.getElementById('input-nama').value.trim() || "Pasien Anonim";
+            const hrString = currentHR + " bpm";
+            const tempString = currentTemp + " °C";
+            
+            const sekarang = new Date();
+            const jam = String(sekarang.getHours()).padStart(2, '0');
+            const menit = String(sekarang.getMinutes()).padStart(2, '0');
+            const waktuString = jam + ":" + menit;
+
+            const analisis = analisisKesehatan(currentHR, currentTemp);
+
+            if (initialClear) {
