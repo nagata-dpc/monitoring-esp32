@@ -3,13 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Monitoring Kesehatan ESP32 - Pink Edition</title>
+    <title>Smart Health Dashboard - Premium Pink Edition</title>
     <style>
         :root {
             --pink-primary: #ec4899;
             --pink-light: #fbcfe8;
             --pink-bg: #fdf2f8;
             --pink-dark: #be185d;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
         }
 
         * {
@@ -31,11 +34,21 @@
         .container {
             background: white;
             width: 100%;
-            max-width: 550px;
-            border-radius: 20px;
-            box-shadow: 0 10px 25px rgba(236, 72, 153, 0.15);
+            max-width: 600px;
+            border-radius: 24px;
+            box-shadow: 0 15px 35px rgba(236, 72, 153, 0.15);
             border: 2px solid var(--pink-light);
-            padding: 30px;
+            padding: 35px;
+            position: relative;
+        }
+
+        .header-title {
+            text-align: center;
+            color: var(--pink-dark);
+            margin-bottom: 20px;
+            font-size: 22px;
+            font-weight: 800;
+            letter-spacing: 0.5px;
         }
 
         .url-box {
@@ -59,22 +72,22 @@
 
         .grid-form {
             display: grid;
-            grid-template-columns: 80px 1fr auto;
-            gap: 15px 10px;
+            grid-template-columns: 90px 1fr auto;
+            gap: 18px 12px;
             align-items: center;
             margin-bottom: 25px;
         }
 
         label {
-            font-weight: 600;
+            font-weight: 700;
             color: var(--pink-dark);
             font-size: 14px;
         }
 
         input[type="text"] {
-            padding: 10px 12px;
+            padding: 11px 14px;
             border: 2px solid var(--pink-light);
-            border-radius: 10px;
+            border-radius: 12px;
             outline: none;
             font-size: 14px;
             transition: border 0.3s;
@@ -84,27 +97,75 @@
             border-color: var(--pink-primary);
         }
 
-        .sensor-display {
+        /* Tampilan Komponen Sensor & Status */
+        .sensor-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
             padding: 10px 15px;
             background-color: #fff1f2;
             border: 2px solid var(--pink-light);
-            border-radius: 10px;
-            font-weight: bold;
-            font-family: monospace;
-            color: var(--pink-dark);
-            font-size: 15px;
-            min-height: 42px;
-            display: flex;
-            align-items: center;
+            border-radius: 12px;
+            transition: all 0.5s ease;
         }
 
+        .sensor-value {
+            font-weight: 800;
+            font-family: monospace;
+            color: var(--pink-dark);
+            font-size: 16px;
+        }
+
+        /* Efek Animasi Detak Jantung */
+        .heart-icon {
+            color: var(--pink-primary);
+            font-size: 18px;
+            display: inline-block;
+            transition: transform 0.2s ease;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            30% { transform: scale(1.3); }
+            60% { transform: scale(1.1); }
+            80% { transform: scale(1.4); }
+            100% { transform: scale(1); }
+        }
+
+        /* Badge Status Kesehatan */
+        .status-badge {
+            padding: 4px 10px;
+            border-radius: 8px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: white;
+            background-color: #9ca3af;
+            transition: all 0.5s ease;
+        }
+
+        /* Pewarnaan Status Dinamis */
+        .bg-normal { background-color: #fff1f2; border-color: var(--pink-light); }
+        .bg-warning { background-color: #fef3c7; border-color: #fde68a; }
+        .bg-danger { background-color: #fee2e2; border-color: #fca5a5; }
+
+        .badge-normal { background-color: var(--success-color); }
+        .badge-warning { background-color: var(--warning-color); }
+        .badge-danger { background-color: var(--danger-color); animation: flash 1s infinite alternate; }
+
+        @keyframes flash {
+            from { opacity: 1; }
+            to { opacity: 0.6; }
+        }
+
+        /* Tombol Premium */
         .btn {
             background-color: var(--pink-primary);
             color: white;
             border: none;
-            padding: 10px 18px;
-            border-radius: 10px;
-            font-weight: 600;
+            padding: 11px 20px;
+            border-radius: 12px;
+            font-weight: 700;
             font-size: 13px;
             cursor: pointer;
             transition: all 0.2s;
@@ -125,31 +186,32 @@
             background-color: #4f46e5;
         }
 
+        /* Desain Tabel Premium */
         .table-wrapper {
-            border-radius: 12px;
+            border-radius: 16px;
             overflow: hidden;
             border: 2px solid var(--pink-light);
-            margin-bottom: 20px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.02);
+            margin-bottom: 25px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.02);
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
             text-align: center;
-            font-size: 14px;
+            font-size: 13px;
         }
 
         th {
             background-color: #fce7f3;
             color: var(--pink-dark);
-            padding: 12px;
+            padding: 14px 10px;
             font-weight: 700;
             border-bottom: 2px solid var(--pink-light);
         }
 
         td {
-            padding: 12px;
+            padding: 12px 10px;
             background-color: white;
             color: #4b5563;
             border-bottom: 1px solid #f3f4f6;
@@ -165,6 +227,15 @@
             letter-spacing: 2px;
         }
 
+        .table-status {
+            font-weight: 700;
+            font-size: 12px;
+        }
+
+        .text-success { color: var(--success-color); }
+        .text-warning { color: var(--warning-color); }
+        .text-danger { color: var(--danger-color); }
+
         .actions-footer {
             display: flex;
             justify-content: flex-end;
@@ -174,39 +245,49 @@
 <body>
 
     <div class="container">
+        <h1 class="header-title">🌸 Smart Health Dashboard</h1>
         
         <input type="text" id="esp-url" value="https://111.111.11.11" placeholder="https://..." class="url-box">
 
         <div class="grid-form">
-            <label for="input-nama">Nama</label>
-            <input type="text" id="input-nama" placeholder="Masukkan nama...">
+            <!-- Input Nama -->
+            <label for="input-nama">Nama Psn</label>
+            <input type="text" id="input-nama" placeholder="Nama pasien...">
             <button id="btn-bluetooth" class="btn btn-bluetooth">Connect Bluetooth</button>
 
-            <label>HR</label>
-            <div id="val-hr" class="sensor-display">-- bpm</div>
-            <div></div>
+            <!-- Monitoring Heart Rate -->
+            <label>Heart Rate</label>
+            <div id="container-hr" class="sensor-container">
+                <span id="val-hr" class="sensor-value">-- bpm</span>
+                <span id="icon-heart" class="heart-icon">♥</span>
+            </div>
+            <span id="badge-hr" class="status-badge">No Data</span>
 
-            <label>Temp</label>
-            <div id="val-temp" class="sensor-display">-- °C</div>
-            <button id="btn-save" class="btn">Save</button>
+            <!-- Monitoring Temperatur -->
+            <label>Suhu Tubuh</label>
+            <div id="container-temp" class="sensor-container">
+                <span id="val-temp" class="sensor-value">-- °C</span>
+                <span>🌡️</span>
+            </div>
+            <button id="btn-save" class="btn">Save Data</button>
         </div>
 
+        <!-- Tabel Riwayat Log Medis -->
         <div class="table-wrapper">
             <table>
                 <thead>
                     <tr>
-                        <th style="border-right: 1px solid var(--pink-light); width: 33.33%;">Nama</th>
-                        <th style="border-right: 1px solid var(--pink-light); width: 33.33%;">HR</th>
-                        <th style="width: 33.33%;">Body Temperature</th>
+                        <th style="border-right: 1px solid var(--pink-light); width: 20%;">Waktu</th>
+                        <th style="border-right: 1px solid var(--pink-light); width: 25%;">Nama</th>
+                        <th style="border-right: 1px solid var(--pink-light); width: 18%;">HR</th>
+                        <th style="border-right: 1px solid var(--pink-light); width: 18%;">Suhu</th>
+                        <th style="width: 21%;">Keterangan</th>
                     </tr>
                 </thead>
                 <tbody id="table-body">
                     <tr class="placeholder-text">
                         <td style="border-right: 1px solid #f3f4f6;">. . . .</td>
                         <td style="border-right: 1px solid #f3f4f6;">. . . .</td>
-                        <td>. . . .</td>
-                    </tr>
-                    <tr class="placeholder-text">
                         <td style="border-right: 1px solid #f3f4f6;">. . . .</td>
                         <td style="border-right: 1px solid #f3f4f6;">. . . .</td>
                         <td>. . . .</td>
@@ -216,9 +297,8 @@
         </div>
 
         <div class="actions-footer">
-            <button id="btn-download" class="btn">Download</button>
+            <button id="btn-download" class="btn">Download Log (.CSV)</button>
         </div>
-
     </div>
 
     <script>
@@ -226,73 +306,13 @@
         const btnDownload = document.getElementById('btn-download');
         const tableBody = document.getElementById('table-body');
         
-        // Array untuk menyimpan data log secara internal agar mudah diunduh
         let savedData = [];
         let initialClear = true; 
+        
+        // Variabel global penampung nilai mentah sensor
+        let currentHR = 0;
+        let currentTemp = 0.0;
+        let currentStatusText = "No Data";
 
-        // Fungsi ketika tombol SAVE diklik
-        btnSave.addEventListener('click', () => {
-            const nama = document.getElementById('input-nama').value.trim() || "Tanpa Nama";
-            const hr = document.getElementById('val-hr').innerText;
-            const temp = document.getElementById('val-temp').innerText;
-
-            if (initialClear) {
-                tableBody.innerHTML = ''; 
-                initialClear = false;
-            }
-
-            // Simpan data ke dalam array objek JavaScript
-            savedData.push({ nama, hr, temp });
-
-            // Tampilkan baris baru ke tabel HTML
-            const newRow = document.createElement('tr');
-            newRow.innerHTML = `
-                <td style="border-right: 1px solid #f3f4f6; font-weight: 500;">${nama}</td>
-                <td style="border-right: 1px solid #f3f4f6; font-family: monospace; color: var(--pink-dark); font-weight: 600;">${hr}</td>
-                <td style="font-family: monospace; color: var(--pink-dark); font-weight: 600;">${temp}</td>
-            `;
-            tableBody.appendChild(newRow);
-        });
-
-        // Fungsi ketika tombol DOWNLOAD diklik
-        btnDownload.addEventListener('click', () => {
-            if (savedData.length === 0) {
-                alert("Belum ada data yang disimpan! Silakan klik tombol 'Save' terlebih dahulu.");
-                return;
-            }
-
-            // Membuat baris dokumen CSV (Header kolom)
-            let csvContent = "data:text/csv;charset=utf-8,";
-            csvContent += "Nama,Heart Rate (HR),Body Temperature\n";
-
-            // Memasukkan setiap baris data yang tersimpan
-            savedData.forEach(row => {
-                // Membersihkan koma jika user memasukkan nama yang mengandung koma agar struktur CSV tidak rusak
-                const safeNama = row.nama.replace(/,/g, " "); 
-                csvContent += `${safeNama},${row.hr},${row.temp}\n`;
-            });
-
-            // Logika browser untuk memicu unduhan file otomatis
-            const encodedUri = encodeURI(csvContent);
-            const downloadLink = document.createElement("a");
-            downloadLink.setAttribute("href", encodedUri);
-            
-            // Nama file saat diunduh otomatis
-            downloadLink.setAttribute("download", "log_monitoring_kesehatan.csv");
-            document.body.appendChild(downloadLink);
-            
-            downloadLink.click(); // Klik tersembunyi
-            document.body.removeChild(downloadLink); // Hapus elemen pembantu
-        });
-
-        // Simulasi penerimaan data Sensor ESP32 (Akan otomatis diperbarui tiap 3 detik untuk demo)
-        setInterval(() => {
-            const randomHR = Math.floor(Math.random() * (90 - 65 + 1)) + 65;
-            const randomTemp = (Math.random() * (37.2 - 36.1) + 36.1).toFixed(1);
-            
-            document.getElementById('val-hr').innerText = randomHR + " bpm";
-            document.getElementById('val-temp').innerText = randomTemp + " °C";
-        }, 3000);
-    </script>
-</body>
-</html>
+        // Fungsi evaluasi parameter medis sesuai standar umum internasional
+        function analisisKesehatan(hr, temp) {
