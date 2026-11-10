@@ -3,90 +3,247 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Monitoring Kesehatan ESP32</title>
-    <!-- Tailwind CSS CDN -->
-    <script src="https://tailwindcss.com"></script>
+    <title>Monitoring Kesehatan ESP32 - Pink Edition</title>
+    <style>
+        /* Desain Dasar & Skema Warna Pink */
+        :root {
+            --pink-primary: #ec4899;
+            --pink-light: #fbcfe8;
+            --pink-bg: #fdf2f8;
+            --pink-dark: #be185d;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--pink-bg);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        /* Kontainer Utama Moderen */
+        .container {
+            background: white;
+            width: 100%;
+            max-width: 550px;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(236, 72, 153, 0.15);
+            border: 2px solid var(--pink-light);
+            padding: 30px;
+        }
+
+        /* Input URL / HTTPS */
+        .url-box {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid var(--pink-light);
+            border-radius: 12px;
+            background-color: #fffafc;
+            color: var(--pink-dark);
+            font-family: monospace;
+            font-size: 14px;
+            margin-bottom: 25px;
+            outline: none;
+            transition: all 0.3s;
+        }
+
+        .url-box:focus {
+            border-color: var(--pink-primary);
+            box-shadow: 0 0 0 3px rgba(236, 72, 153, 0.2);
+        }
+
+        /* Tata Letak Form Grid */
+        .grid-form {
+            display: grid;
+            grid-template-columns: 80px 1fr auto;
+            gap: 15px 10px;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        label {
+            font-weight: 600;
+            color: var(--pink-dark);
+            font-size: 14px;
+        }
+
+        input[type="text"] {
+            padding: 10px 12px;
+            border: 2px solid var(--pink-light);
+            border-radius: 10px;
+            outline: none;
+            font-size: 14px;
+            transition: border 0.3s;
+        }
+
+        input[type="text"]:focus {
+            border-color: var(--pink-primary);
+        }
+
+        /* Kotak Tampilan Nilai Sensor */
+        .sensor-display {
+            padding: 10px 15px;
+            background-color: #fff1f2;
+            border: 2px solid var(--pink-light);
+            border-radius: 10px;
+            font-weight: bold;
+            font-family: monospace;
+            color: var(--pink-dark);
+            font-size: 15px;
+            min-height: 42px;
+            display: flex;
+            align-items: center;
+        }
+
+        /* Gaya Tombol Kreatif */
+        .btn {
+            background-color: var(--pink-primary);
+            color: white;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 4px 6px rgba(236, 72, 153, 0.2);
+        }
+
+        .btn:hover {
+            background-color: var(--pink-dark);
+            transform: translateY(-1px);
+        }
+
+        .btn-bluetooth {
+            background-color: #6366f1; /* Biru Indigo agar kontras untuk Bluetooth */
+            box-shadow: 0 4px 6px rgba(99, 102, 241, 0.2);
+        }
+
+        .btn-bluetooth:hover {
+            background-color: #4f46e5;
+        }
+
+        /* Desain Tabel Premium */
+        .table-wrapper {
+            border-radius: 12px;
+            overflow: hidden;
+            border: 2px solid var(--pink-light);
+            margin-bottom: 20px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.02);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: center;
+            font-size: 14px;
+        }
+
+        th {
+            background-color: #fce7f3;
+            color: var(--pink-dark);
+            padding: 12px;
+            font-weight: 700;
+            border-bottom: 2px solid var(--pink-light);
+        }
+
+        td {
+            padding: 12px;
+            background-color: white;
+            color: #4b5563;
+            border-bottom: 1px solid #f3f4f6;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        .placeholder-text {
+            color: #d1d5db;
+            font-weight: bold;
+            letter-spacing: 2px;
+        }
+
+        /* Posisi Tombol Unduh */
+        .actions-footer {
+            display: flex;
+            justify-content: flex-end;
+        }
+    </style>
 </head>
-<body class="bg-gray-100 min-h-screen flex items-center justify-center p-4">
+<body>
 
-    <!-- Kontainer Utama mirip Lembaran Catatan/Wireframe -->
-    <div class="bg-white w-full max-w-xl rounded-xl shadow-lg border border-gray-300 p-6 space-y-6">
+    <div class="container">
         
-        <!-- Field Utama Top Bar: HTTPS/URL Input -->
-        <div class="w-full">
-            <input type="text" id="esp-url" value="https://111.111.11.11" placeholder="https://..." 
-                   class="w-full px-4 py-2 border border-gray-400 rounded-md bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-sm">
-        </div>
+        <!-- Field HTTPS / URL -->
+        <input type="text" id="esp-url" value="https://111.111.11.11" placeholder="https://..." class="url-box">
 
-        <!-- Bagian Input & Monitoring Utama -->
-        <div class="grid grid-cols-3 gap-4 items-center">
+        <!-- Grid Sensor dan Input -->
+        <div class="grid-form">
             
             <!-- Baris Nama -->
-            <label class="font-bold text-gray-700 text-sm">Nama</label>
-            <input type="text" id="input-nama" placeholder="Masukkan nama..." 
-                   class="col-span-1 px-3 py-1.5 border border-gray-400 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
-            <button id="btn-bluetooth" class="bg-white hover:bg-gray-50 text-gray-800 text-xs font-semibold py-1.5 px-3 border border-gray-400 rounded shadow">
-                connect Bluetooth
-            </button>
+            <label for="input-nama">Nama</label>
+            <input type="text" id="input-nama" placeholder="Masukkan nama...">
+            <button id="btn-bluetooth" class="btn btn-bluetooth">Connect Bluetooth</button>
 
             <!-- Baris Heart Rate (HR) -->
-            <label class="font-bold text-gray-700 text-sm">HR</label>
-            <div id="val-hr" class="px-3 py-1.5 border border-gray-400 rounded-md bg-gray-50 text-sm h-9 flex items-center text-gray-600 font-mono">
-                -- bpm
-            </div>
-            <div></div> <!-- Kolom kosong penyeimbang -->
+            <label>HR</label>
+            <div id="val-hr" class="sensor-display">-- bpm</div>
+            <div></div> <!-- Spacer -->
 
             <!-- Baris Temp -->
-            <label class="font-bold text-gray-700 text-sm">Temp</label>
-            <div id="val-temp" class="px-3 py-1.5 border border-gray-400 rounded-md bg-gray-50 text-sm h-9 flex items-center text-gray-600 font-mono">
-                -- °C
-            </div>
-            <button id="btn-save" class="bg-white hover:bg-gray-50 text-gray-800 text-xs font-semibold py-1.5 px-3 border border-gray-400 rounded shadow">
-                Save
-            </button>
+            <label>Temp</label>
+            <div id="val-temp" class="sensor-display">-- °C</div>
+            <button id="btn-save" class="btn">Save</button>
+            
         </div>
 
-        <!-- Tabel Monitoring Log Data -->
-        <div class="border border-gray-400 rounded-md overflow-hidden bg-white">
-            <table class="w-full text-left text-sm border-collapse">
+        <!-- Tabel Log Data -->
+        <div class="table-wrapper">
+            <table>
                 <thead>
-                    <tr class="border-b border-gray-400 bg-gray-50 text-gray-700 font-bold">
-                        <th class="py-2 px-4 border-r border-gray-400 w-1/3 text-center">Nama</th>
-                        <th class="py-2 px-4 border-r border-gray-400 w-1/3 text-center">HR</th>
-                        <th class="py-2 px-4 w-1/3 text-center">Body Temperature</th>
+                    <tr>
+                        <th style="border-right: 1px solid var(--pink-light); w-1/3">Nama</th>
+                        <th style="border-right: 1px solid var(--pink-light); w-1/3">HR</th>
+                        <th class="w-1/3">Body Temperature</th>
                     </tr>
                 </thead>
                 <tbody id="table-body">
-                    <!-- Placeholder baris tabel kosong mirip sketsa titik-titik -->
-                    <tr class="border-b border-gray-300 text-gray-400">
-                        <td class="py-2 px-4 border-r border-gray-300 text-center font-mono">. . . .</td>
-                        <td class="py-2 px-4 border-r border-gray-300 text-center font-mono">. . . .</td>
-                        <td class="py-2 px-4 text-center font-mono">. . . .</td>
+                    <!-- Tampilan Awal Berbintik Sesuai Sketsa -->
+                    <tr class="placeholder-text">
+                        <td style="border-right: 1px solid #f3f4f6;">. . . .</td>
+                        <td style="border-right: 1px solid #f3f4f6;">. . . .</td>
+                        <td>. . . .</td>
                     </tr>
-                    <tr class="border-b border-gray-300 text-gray-400">
-                        <td class="py-2 px-4 border-r border-gray-300 text-center font-mono">. . . .</td>
-                        <td class="py-2 px-4 border-r border-gray-300 text-center font-mono">. . . .</td>
-                        <td class="py-2 px-4 text-center font-mono">. . . .</td>
+                    <tr class="placeholder-text">
+                        <td style="border-right: 1px solid #f3f4f6;">. . . .</td>
+                        <td style="border-right: 1px solid #f3f4f6;">. . . .</td>
+                        <td>. . . .</td>
                     </tr>
                 </tbody>
             </table>
         </div>
 
-        <!-- Tombol Download di bawah Tabel -->
-        <div class="flex justify-end">
-            <button id="btn-download" class="bg-white hover:bg-gray-50 text-gray-800 text-xs font-semibold py-1.5 px-4 border border-gray-400 rounded shadow">
-                Download
-            </button>
+        <!-- Tombol Download -->
+        <div class="actions-footer">
+            <button id="btn-download" class="btn">Download</button>
         </div>
 
     </div>
 
-    <!-- Integrasi JavaScript untuk Logika & Koneksi ESP32 -->
     <script>
         // Logika Menyimpan Data Sementara ke Tabel
         const btnSave = document.getElementById('btn-save');
         const tableBody = document.getElementById('table-body');
-        let initialClear = true; // Flag untuk menghapus placeholder bintik-bintik saat data pertama masuk
+        let initialClear = true; 
 
         btnSave.addEventListener('click', () => {
             const nama = document.getElementById('input-nama').value || "Tanpa Nama";
@@ -94,42 +251,28 @@
             const temp = document.getElementById('val-temp').innerText;
 
             if (initialClear) {
-                tableBody.innerHTML = ''; // Hapus baris . . . .
+                tableBody.innerHTML = ''; 
                 initialClear = false;
             }
 
-            // Buat baris data baru
             const newRow = document.createElement('tr');
-            newRow.className = "border-b border-gray-300 text-gray-800 hover:bg-gray-50";
             newRow.innerHTML = `
-                <td class="py-2 px-4 border-r border-gray-300 text-center">${nama}</td>
-                <td class="py-2 px-4 border-r border-gray-300 text-center font-mono">${hr}</td>
-                <td class="py-2 px-4 text-center font-mono">${temp}</td>
+                <td style="border-right: 1px solid #f3f4f6; font-weight: 500;">${nama}</td>
+                <td style="border-right: 1px solid #f3f4f6; font-family: monospace; color: var(--pink-dark); font-weight: 600;">${hr}</td>
+                <td style="font-family: monospace; color: var(--pink-dark); font-weight: 600;">${temp}</td>
             `;
             tableBody.appendChild(newRow);
         });
 
-        // ==========================================
-        // CONTOH KONEKSI DATA DARI ESP32 (MAX30102 & DS18B20)
-        // ==========================================
-        // Anda bisa mengaktifkan fungsi ini jika ESP32 mengirim data via AJAX/Fetch API atau WebSockets
-        
-        function fetchDataDariESP32() {
-            const espIP = document.getElementById('esp-url').value;
+        // Simulasi penerimaan data Sensor ESP32 (Hapus/Komentari jika sudah disambungkan hardware asli)
+        // Hanya untuk memastikan visual data berjalan baik di halaman web Anda
+        setInterval(() => {
+            const randomHR = Math.floor(Math.random() * (90 - 65 + 1)) + 65;
+            const randomTemp = (Math.random() * (37.2 - 36.1) + 36.1).toFixed(1);
             
-            // Contoh implementasi request HTTP GET ke ESP32
-            fetch(`${espIP}/data-sensor`)
-                .then(response => response.json())
-                .then(data => {
-                    // Update tampilan data real-time pada UI
-                    document.getElementById('val-hr').innerText = data.hr + " bpm";
-                    document.getElementById('val-temp').innerText = data.temp + " °C";
-                })
-                .catch(err => console.log("Menunggu koneksi ESP32..."));
-        }
-
-        // Jalankan polling data setiap 1 detik jika ingin menggunakan metode HTTP Fetch
-        // setInterval(fetchDataDariESP32, 1000);
+            document.getElementById('val-hr').innerText = randomHR + " bpm";
+            document.getElementById('val-temp').innerText = randomTemp + " °C";
+        }, 3000);
     </script>
 </body>
 </html>
